@@ -1,0 +1,21 @@
+Setup:
+	AuctionList	
+		main bidspotter site crawler
+		Creates Auction objects
+	Auction
+		Constructor uses the AuctionToLots object
+		Contains list of lot objects
+	Lot
+		Constructor goes to the lot's individual page and gets additional info suchas time end
+
+
+
+
+
+Done:
+
+
+
+To Do:
+	AuctionToLots
+		Return a list of lot objects
