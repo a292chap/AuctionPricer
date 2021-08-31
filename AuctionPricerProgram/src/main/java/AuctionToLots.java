@@ -2,11 +2,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+
 import javax.net.ssl.HttpsURLConnection;
 
 // Object that gets the lots for a given auction
 public class AuctionToLots {
-	private boolean validWebsite;
 	private String urlLink;
 	private String rawText;
 	private URL webPage;
@@ -14,10 +15,9 @@ public class AuctionToLots {
 	private Boolean isHttps;
 	
 	private int index;
-	private int index2;
-	private int index3;
 	
 	AuctionToLots(String urlLink) {
+		/*
 		// Check that URL has been given
 		if (urlLink == null) {
 			// TODO Way to display error
@@ -46,8 +46,8 @@ public class AuctionToLots {
 		}
 		if (webpageIS == null) {
 			System.out.println("webpageIS null");
-		}
-		
+		}*/
+		rawText = Webpage.getWebpageString(urlLink);
 		parseAuctionIntoLots();
 	}
 	
@@ -124,7 +124,6 @@ public class AuctionToLots {
 					&& urlLink.substring(0, 7).compareTo(http) != 0) {
 				urlLink = http + urlLink;
 			} else {
-				String temp = urlLink.substring(0, 8);
 				if (urlLink.substring(0, 8).compareTo(https) == 0) {
 					s = true; // Only case where urlLink already contains "https://"
 				}
@@ -161,9 +160,9 @@ public class AuctionToLots {
 	}
 
 
-	private void parseAuctionIntoLots() {
+	private ArrayList<Lot> parseAuctionIntoLots() {
 		// An array of lots from given auction to be returned
-		Lot[] returnArr;
+		ArrayList<Lot> returnArr = new ArrayList<Lot>();
 		String[][] tokens = {{"<a name=\"lot-title\" href=\"","\" class=\""},
 				{"<span class=\"lot-title\">","</span>"},
 				{"<span class=\"lot-number\">", "</span>"},};
@@ -194,6 +193,7 @@ public class AuctionToLots {
 		String lotTitle;
 		String lotNum;
 		int lotPrice;
+		URL lotURL = null;
 		
 		String lotPrice2;
 		String lotPrice3;
@@ -213,8 +213,13 @@ public class AuctionToLots {
 			lotPrice2 = extractString(tokenPriceStart1, tokenPriceEnd, index2);
 			lotPrice3 = extractString(tokenPriceStart1, tokenPriceEnd, index3);
 			
-			lotLink = "https://www.bidspotter.com" + lotLink;
-			
+			lotLink   = "https://www.bidspotter.com" + lotLink;
+			try {
+				lotURL = new URL(lotLink);
+			} catch (MalformedURLException e1) {
+				System.out.println("Bad URL for parsed lot link in AuctionToLots");
+				e1.printStackTrace();
+			}
 			
 			//---------------
 			// Find Lot Price
@@ -223,7 +228,7 @@ public class AuctionToLots {
 
 			if (index2 == -1 && index3 == -1) {
 				System.out.println("ERROR, END OF FILE?");
-				return;
+				return null;
 			}
 			if (index2 == -1) {
 				index2 = Integer.MAX_VALUE;
@@ -243,6 +248,10 @@ public class AuctionToLots {
 				lotPrice = Integer.parseInt(lotPrice3);
 			}
 			
+			
+			Lot l = new Lot(lotTitle, lotNum, lotPrice, lotURL);
+			returnArr.add(l);
+			
 			// Display values
 			System.out.println(lotTitle);
 			System.out.println("   Lot:   " + lotNum);
@@ -250,8 +259,10 @@ public class AuctionToLots {
 			System.out.println("   Link:  " + lotLink);
 			
 			System.out.println("");
-		
+			
 		}
+		
+		return returnArr;
 		
 	}
 	
